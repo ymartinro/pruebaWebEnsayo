@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+     http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd">
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<!-- <bean id="h2console" class="org.h2.tools.Server" lazy-init="false" 
+		factory-method="createWebServer" init-method="start" > <constructor-arg value="-web,-webAllowOthers,-webPort,8082" 
+		/> </bean> <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"> 
+		<property name="username" value="sa" /> <property name="password" value="" 
+		/> <property name="driverClassName" value="org.h2.Driver" /> <property name="url" 
+		value="jdbc:h2:mem:foodb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE" /> </bean> -->
+	<!-- in-memory database and a datasource -->
+	<jdbc:embedded-database id="dataSource">
+		<jdbc:script location="classpath:database/PruebaAWeb-hsqldb-schema.sql" />
+		<jdbc:script location="classpath:database/PruebaAWeb-hsqldb-dataload.sql" />
+	</jdbc:embedded-database>
+	
+<!--
+<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <property name="driverClassName" value="org.postgresql.Driver"/>
+    <property name="url" value="jdbc:postgresql://localhost:5432/iberdrola"/>
+    <property name="username" value="postgres"/>
+    <property name="password" value="pass"/>
+</bean>-->
+
+	<!--Properties <context:property-placeholder location="classpath:application.properties" 
+		/> -->
+
+	<!-- transaction manager, use DataSourceTransactionManager" for JDBC local 
+		tx -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- enable component scanning and autowire (beware that this does not enable 
+		mapper scanning!) 
+	<context:component-scan base-package="com.emervel.pruebaaweb" />
+-->
+	<!-- enable transaction demarcation with annotations -->
+	<tx:annotation-driven />
+
+	<!-- define the SqlSessionFactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="com.emervel.pruebaaweb.domain" />
+	</bean>
+
+	<!-- scan for mappers and let them be autowired -->
+	<mybatis:scan base-package="com.emervel.pruebaaweb.mappers" />
+	
+	<bean id="personService" class="com.emervel.pruebaaweb.services.impl.PersonServiceImpl"/>
+
+</beans>
